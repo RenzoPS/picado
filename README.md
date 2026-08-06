@@ -108,7 +108,3 @@ src/
 DESIGN.md                el sistema de diseño completo
 PRODUCT.md               contexto de producto y del brief ficticio
 ```
-
-## Licencia
-
-MIT. Ver [`LICENSE`](LICENSE).
