@@ -1,0 +1,321 @@
+@import 'tailwindcss';
+
+/* ------------------------------------------------------------------
+   PICADO — chapa esmaltada del complejo de fútbol 5.
+   Los tokens salen de DESIGN.md. Cambiar acá, no en los componentes.
+------------------------------------------------------------------ */
+
+@theme {
+  --color-cancha: #0b6b3a;
+  --color-cancha-deep: #064a28;
+  /* El rayado del césped cortado alterna hacia abajo, nunca hacia arriba: así
+     la superficie más clara que puede tocar el texto sigue siendo el verde
+     base, y el cuerpo en cal mantiene 5.1:1 en toda la página. */
+  --color-cancha-raya: #085530;
+  --color-cal: #f2efe3;
+  --color-senal: #ffc220;
+  --color-sombra: #0a0f0c;
+  --color-oxido: #b4381f;
+  --color-chapa: #c9c3b4;
+  /* Las dos únicas alfas del sistema: el canto del material y la sombra del
+     celular apoyado. Estaban escritas a mano como rgba() en seis lugares. */
+  --color-canto: rgb(10 15 12 / 0.45);
+  --color-sombra-apoyo: rgb(10 15 12 / 0.55);
+
+  --font-display: 'Bungee', Impact, sans-serif;
+  --font-shade: 'Bungee Shade', 'Bungee', Impact, sans-serif;
+  --font-sans: 'Chivo', system-ui, sans-serif;
+
+  --radius-chapa: 3px;
+  --radius-plate: 6px;
+
+  --spacing-band: 8.5rem;
+
+  --ease-chapa: cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+
+  body {
+    background-color: var(--color-cancha);
+    color: var(--color-cal);
+    font-family: var(--font-sans);
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    letter-spacing: -0.003em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-senal);
+    color: var(--color-sombra);
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-senal);
+    outline-offset: 3px;
+  }
+}
+
+@layer components {
+  /* Letra de pincel: sombra dura, blur cero. Es la gramática del cartel. */
+  .letra-pintada {
+    font-family: var(--font-display);
+    color: var(--color-senal);
+    text-shadow: 0.07em 0.07em 0 var(--color-sombra);
+    letter-spacing: -0.01em;
+    line-height: 0.86;
+  }
+
+  .letra-pintada-cal {
+    font-family: var(--font-display);
+    color: var(--color-cal);
+    text-shadow: 0.07em 0.07em 0 var(--color-sombra);
+    letter-spacing: -0.01em;
+    line-height: 0.86;
+  }
+
+  /* El marcador: Chivo Black para todo número y título de peso. */
+  .marcador {
+    font-family: var(--font-sans);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ---- Los tres registros de texto -------------------------------------
+     Un cartel no escribe todo igual: la bajada entra a la sección y se lee
+     de lejos; la letra chica es la nota al costado del cartel.
+  --------------------------------------------------------------------- */
+
+  /* Bajada: entra a una sección. Grande, corta, con la raya de cal encima. */
+  .bajada {
+    font-size: clamp(1.25rem, 2vw, 1.5rem);
+    font-weight: 400;
+    line-height: 1.35;
+    letter-spacing: -0.015em;
+    max-width: 44ch;
+    text-wrap: pretty;
+  }
+
+  .bajada::before {
+    content: '';
+    display: block;
+    width: 3.5rem;
+    height: 5px;
+    margin-bottom: 1.5rem;
+    background-color: var(--color-cal);
+  }
+
+
+  /* Letra chica: aclaraciones y advertencias. Va en itálica, como la nota
+     escrita al costado del cartel cuando ya no quedaba lugar. */
+  .letra-chica {
+    font-size: 1.0625rem;
+    font-style: italic;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: -0.005em;
+    max-width: 40ch;
+    text-wrap: pretty;
+  }
+
+  /* Pincelada: el énfasis del pintor de carteles es un brochazo amarillo por
+     debajo de la palabra, no una negrita. Borde duro, sin blur. */
+  .pincelada {
+    font-weight: 700;
+    /* El brochazo cruza la base de la letra, no la subraya: un pincel plano
+       apoyado de una pasada, del alto de la cerda. */
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0 calc(100% - 0.34em),
+      var(--color-senal) calc(100% - 0.34em) calc(100% - 0.05em),
+      transparent calc(100% - 0.05em) 100%
+    );
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+  }
+
+  /* ---- Movimiento -------------------------------------------------------
+     Una sola gramática de aparición: el rodillo de pintura pasando de
+     izquierda a derecha. Nada de fade-and-rise genérico.
+  --------------------------------------------------------------------- */
+  .rodillo {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 620ms cubic-bezier(0.16, 0.84, 0.28, 1);
+  }
+
+  .rodillo-pintado {
+    clip-path: inset(0 0 0 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rodillo {
+      clip-path: inset(0 0 0 0);
+      transition: none;
+    }
+  }
+
+  /* Al imprimir no hay scroll que dispare nada: todo va destapado. */
+  @media print {
+    .rodillo {
+      clip-path: inset(0 0 0 0) !important;
+      transition: none !important;
+    }
+  }
+
+  /* El ícono acusa recibo del hover girando apenas sobre su eje, como una
+     chapa colgada que se mueve cuando la tocás. */
+  .icono-vivo {
+    transition: transform 140ms var(--ease-chapa);
+  }
+
+  @media (hover: hover) {
+    .placa-interactiva:hover .icono-vivo,
+    .ficha:hover .icono-vivo {
+      transform: rotate(-6deg) scale(1.08);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .icono-vivo {
+      transition: none;
+    }
+  }
+
+  /* Ficha: la unidad chica de esta página. Ícono grande arriba, nombre corto
+     abajo, nada más. Reemplaza al párrafo explicativo. */
+  .ficha {
+    position: relative;
+    border-radius: var(--radius-plate);
+    transition:
+      transform 120ms var(--ease-chapa),
+      box-shadow 120ms var(--ease-chapa);
+  }
+
+  @media (hover: hover) {
+    .ficha:hover {
+      transform: translate(-3px, -3px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ficha {
+      transition: none;
+    }
+  }
+
+  /* Placa de chapa atornillada sobre el campo. */
+  .placa {
+    position: relative;
+    border-radius: var(--radius-plate);
+    box-shadow:
+      8px 8px 0 var(--color-sombra),
+      inset 0 -3px 0 var(--color-canto);
+  }
+
+  .placa-interactiva {
+    transition:
+      transform 90ms var(--ease-chapa),
+      box-shadow 90ms var(--ease-chapa);
+  }
+
+  @media (hover: hover) {
+    .placa-interactiva:hover {
+      transform: translate(-4px, -4px);
+      box-shadow:
+        12px 12px 0 var(--color-sombra),
+        inset 0 -3px 0 var(--color-canto);
+    }
+  }
+
+  .placa-interactiva:active {
+    transform: translate(2px, 2px);
+    box-shadow:
+      4px 4px 0 var(--color-sombra),
+      inset 0 -3px 0 var(--color-canto);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .placa-interactiva {
+      transition: none;
+    }
+  }
+
+  /* Rayado del césped recién cortado. */
+  .campo-vertical {
+    background-image: repeating-linear-gradient(
+      90deg,
+      var(--color-cancha) 0 7rem,
+      var(--color-cancha-raya) 7rem 14rem
+    );
+  }
+
+  .campo-horizontal {
+    background-image: repeating-linear-gradient(
+      0deg,
+      var(--color-cancha) 0 5.5rem,
+      var(--color-cancha-deep) 5.5rem 11rem
+    );
+  }
+}
+
+@layer utilities {
+  .sombra-dura {
+    box-shadow: 8px 8px 0 var(--color-sombra);
+  }
+
+
+  .sombra-letra {
+    text-shadow: 0.07em 0.07em 0 var(--color-sombra);
+  }
+
+
+  /* Esmalte comido en el canto de la chapa. La firma del cartel viejo:
+     el óxido aparece donde la pintura se saltó, no como un adorno suelto. */
+  .canto-oxido::before,
+  .canto-oxido::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 10px;
+    pointer-events: none;
+    /* Manchas de borde duro en posiciones irregulares: el esmalte se salta
+       donde se salta, no cada tantos píxeles. Nada de blur. */
+    background-image:
+      radial-gradient(circle at 4% 0%, var(--color-oxido) 0 5px, transparent 5px),
+      radial-gradient(circle at 11% 0%, var(--color-oxido) 0 3px, transparent 3px),
+      radial-gradient(circle at 23% 0%, var(--color-oxido) 0 8px, transparent 8px),
+      radial-gradient(circle at 31% 0%, var(--color-oxido) 0 3px, transparent 3px),
+      radial-gradient(circle at 47% 0%, var(--color-oxido) 0 5px, transparent 5px),
+      radial-gradient(circle at 58% 0%, var(--color-oxido) 0 8px, transparent 8px),
+      radial-gradient(circle at 66% 0%, var(--color-oxido) 0 3px, transparent 3px),
+      radial-gradient(circle at 79% 0%, var(--color-oxido) 0 7px, transparent 7px),
+      radial-gradient(circle at 88% 0%, var(--color-oxido) 0 4px, transparent 4px),
+      radial-gradient(circle at 96% 0%, var(--color-oxido) 0 7px, transparent 7px);
+    -webkit-mask-image: linear-gradient(to bottom, var(--color-sombra), transparent);
+    mask-image: linear-gradient(to bottom, var(--color-sombra), transparent);
+    opacity: 0.4;
+  }
+
+  .canto-oxido::before {
+    top: 0;
+  }
+
+  .canto-oxido::after {
+    bottom: 0;
+    transform: scaleY(-1);
+  }
+}

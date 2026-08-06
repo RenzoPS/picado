@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Build y dependencias
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Estado local de herramientas de asistencia
+.claude/
+.impeccable/
+.impeccable-live/
+.impeccable-live.json
+.playwright-mcp/
+**/impeccable-live.client.ts
+
+# Material de referencia del proceso, fuera del entregable
+idea-cliente.pdf
+picado-*.png
+picado-*.jpeg
+design/
